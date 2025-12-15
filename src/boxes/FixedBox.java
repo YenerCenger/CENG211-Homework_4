@@ -6,9 +6,14 @@ import tools.SpecialTool;
 
 public class FixedBox extends Box {
 
-    public FixedBox(grid.BoxGrid grid, SpecialTool tool) {
-        super(BoxFactory.randomFaces(grid.rng()), null);
-        this.opened = true; // always shown as O
+    public FixedBox() {
+        super();
+    }
+
+    @Override
+    public char getTypeMarker() {
+        char c = 'X';
+        return c; // R for Regular Box
     }
 
     @Override
@@ -17,12 +22,11 @@ public class FixedBox extends Box {
     }
 
     @Override
-    public void stampTop(char targetLetter) {
-        // fixed top; do nothing
+    public void setTool(SpecialTool tool) {
+        super.setTool(null); // Ne verilirse verilsin null yap.
     }
 
     @Override
-    public char getTypeMarker() {
-        return 'X';
+    public void setTop(char letter) {
     }
 }
