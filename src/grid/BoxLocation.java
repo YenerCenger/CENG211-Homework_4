@@ -24,7 +24,7 @@ public final class BoxLocation {
         String s = input.trim().toUpperCase(Locale.ROOT);
 
         // Accept "R2-C4"
-        if (s.matches("R\d\s*-\s*C\d")) {
+        if (s.matches("R\\d\\s*-\\s*C\\d")) {
             s = s.replace(" ", "");
             int r = Integer.parseInt(s.substring(1, 2)) - 1;
             int c = Integer.parseInt(s.substring(s.indexOf('C') + 1, s.indexOf('C') + 2)) - 1;
@@ -32,7 +32,7 @@ public final class BoxLocation {
         }
 
         // Accept "2-4"
-        if (s.matches("\d\s*-\s*\d")) {
+        if (s.matches("\\d\\s*-\\s*\\d")) {
             s = s.replace(" ", "");
             String[] parts = s.split("-");
             int r = Integer.parseInt(parts[0]) - 1;
