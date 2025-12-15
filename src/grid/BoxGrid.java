@@ -15,7 +15,7 @@ import tools.SpecialTool;
 /*
  * ANSWER TO COLLECTIONS QUESTION:
  * I used an ArrayList<Box> to store the 8x8 grid in a contiguous 1D structure (size 64).
- * This provides O(1) access via index = row*8 + col. Since the game requires frequent
+ * This provides O(1) access via index = row * 8 + col. Since the game requires frequent
  * index-based access (getting neighbors, checking specific coordinates) and row/column
  * traversals for the domino effect, an ArrayList is more performant and easier to manage
  * than a LinkedList or a raw 2D array.
@@ -86,6 +86,9 @@ public class BoxGrid {
         return (char) ('A' + rng.nextInt(8));
     }
 
+    /**
+     * Checks if the coordinates are within grid boundaries.
+     */
     private boolean isValid(int row, int col) {
         return row >= 0 && row < SIZE && col >= 0 && col < SIZE;
     }
@@ -106,7 +109,7 @@ public class BoxGrid {
     /**
      * Creates a single new random box. Used during initialization and when
      * new boxes enter the grid from edges during rolling.
-     * * Probabilities:
+     * Probabilities:
      * - FixedBox: 5%
      * - UnchangingBox: 10%
      * - RegularBox: 85%
@@ -119,13 +122,17 @@ public class BoxGrid {
         double p = rng.nextDouble();
         if (p < 0.05) {
             // 5% chance: FixedBox (Always empty, cannot move)
-            return new FixedBox(this, null);
+            return new FixedBox(); 
         } else if (p < 0.15) {
             // 10% chance: UnchangingBox (Guaranteed tool, faces don't change)
-            return new UnchangingBox(this, generateRandomToolForUnchanging());
+            UnchangingBox uBox = new UnchangingBox();
+            uBox.setTool(generateRandomToolForUnchanging());
+            return uBox;
         } else {
             // 85% chance: RegularBox
-            return new RegularBox(this, generateRandomToolForRegular());
+            RegularBox rBox = new RegularBox();
+            rBox.setTool(generateRandomToolForRegular());
+            return rBox;
         }
     }
 
@@ -136,7 +143,7 @@ public class BoxGrid {
     }
 
     private SpecialTool generateRandomToolForUnchanging() {
-        // Unchanging boxes are guaranteed to have a tool.
+        // Unchanging boxes are guaranteed to have a tool (20% chance for each type).
         return SpecialTool.randomTool(this, rng, 0.20);
     }
 
@@ -147,7 +154,7 @@ public class BoxGrid {
     /**
      * Executes the main mechanics of the game's "First Stage".
      * Rolls a row or column starting from an edge, propagating the movement
-     * until a FixedBox is encountered.
+     * until a FixedBox is encountered (Domino Effect).
      * * @param row The row index of the selected edge box.
      * @param col The column index of the selected edge box.
      * @param dir The direction to push the box (UP, DOWN, LEFT, RIGHT).
@@ -213,14 +220,13 @@ public class BoxGrid {
         
         // Track moved locations for the "Open Box" stage
         for (int c = 0; c < limitCol; c++) {
-            // Boxes from 0 to limitCol-1 will move to 1 to limitCol.
-            // We track their NEW positions.
+            // Boxes from 0 to limitCol-1 will move. We track their positions.
             rolledThisTurnLocations.add(new BoxLocation(row, c));
         }
 
         // 2 & 3. Shift Logic (Iterate backwards to prevent overwriting data we still need)
         // We move boxes from [0...limitCol-2] into [1...limitCol-1].
-        // The box at [limitCol-1] is effectively overwritten by [limitCol-2], so it disappears.
+        // The box at [limitCol-1] is effectively overwritten by [limitCol-2].
         for (int c = limitCol - 1; c > 0; c--) {
             Box movingBox = getBoxAt(row, c - 1);
             movingBox.roll(Direction.RIGHT); // Apply physical rotation
@@ -228,7 +234,6 @@ public class BoxGrid {
         }
         
         // 4. Insert new box at the start (Index 0)
-        // Note: The loop handled c=1 (taking from c=0). So c=0 is now free to receive a new box.
         setBoxAt(row, 0, createRandomBox());
     }
 
@@ -242,6 +247,7 @@ public class BoxGrid {
             }
         }
 
+        // Track moved locations
         for (int c = SIZE - 1; c > limitCol; c--) {
              rolledThisTurnLocations.add(new BoxLocation(row, c));
         }
@@ -267,6 +273,7 @@ public class BoxGrid {
             }
         }
         
+        // Track moved locations
         for (int r = 0; r < limitRow; r++) {
             rolledThisTurnLocations.add(new BoxLocation(r, col));
         }
@@ -292,6 +299,7 @@ public class BoxGrid {
             }
         }
 
+        // Track moved locations
         for (int r = SIZE - 1; r > limitRow; r--) {
             rolledThisTurnLocations.add(new BoxLocation(r, col));
         }
@@ -352,9 +360,7 @@ public class BoxGrid {
         }
 
         // Replace with a new FixedBox (effectively removing any tool inside the old box)
-        // Ideally, we should copy the faces, but since we don't have access to faces array,
-        // we create a new random FixedBox as a fallback.
-        FixedBox newFixed = new FixedBox(this, null);
+        FixedBox newFixed = new FixedBox();
         setBoxAt(row, col, newFixed);
     }
 
@@ -363,7 +369,8 @@ public class BoxGrid {
      */
     public void stampBox(int row, int col, char targetLetter) {
         if (!isValid(row, col)) return;
-        getBoxAt(row, col).stampTop(targetLetter);
+        // Using 'setTop' as defined in Yener's Box class
+        getBoxAt(row, col).setTop(targetLetter);
     }
 
     /** Called by MassRowStamp tool. */
@@ -394,7 +401,8 @@ public class BoxGrid {
     public int calculateScore(char targetLetter) {
         int score = 0;
         for (Box box : boxes) {
-            if (box.getTopLetter() == targetLetter) score++;
+            // Using 'getTop' as defined in Yener's Box class
+            if (box.getTop() == targetLetter) score++;
         }
         return score;
     }
@@ -406,7 +414,7 @@ public class BoxGrid {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        // Header
+        // Column Headers
         sb.append("      ");
         for (int c = 1; c <= SIZE; c++) sb.append("C").append(c).append("      ");
         sb.append("\n");
@@ -418,12 +426,15 @@ public class BoxGrid {
                 Box b = getBoxAt(r, c);
                 // Box Format: | Type-Letter-Status |
                 sb.append("| ").append(b.getTypeMarker()).append("-")
-                  .append(b.getTopLetter()).append("-");
+                  .append(b.getTop()).append("-");
                 
-                // Determine Status Marker (O=Open/Empty, M=Mystery, S=SpecialTool found)
-                if (b instanceof FixedBox || (b.isOpened() && b.isEmpty())) {
+                // Determine Status Marker 
+                // O = Open/Empty or Fixed
+                // S = Special Tool inside (and open)
+                // M = Mystery (Closed)
+                if (b instanceof FixedBox || (b.isOpen() && b.getTool() == null)) {
                     sb.append("O");
-                } else if (b.isOpened() && !b.isEmpty()) {
+                } else if (b.isOpen() && b.getTool() != null) {
                      sb.append("S"); 
                 } else {
                     sb.append("M");
