@@ -2,10 +2,8 @@ package tools;
 
 import java.util.Random;
 
-import game.BoxPuzzle;
-
 public abstract class SpecialTool {
-    public abstract void useTool(BoxPuzzle puzzle);
+    public abstract void useTool(game.BoxPuzzle puzzle, int row, int col);
 
     public static SpecialTool randomTool(grid.BoxGrid grid, Random rng, double eachProbability) {
         double p = rng.nextDouble();
