@@ -22,8 +22,8 @@ public class BoxPuzzle {
         return grid;
     }
 
-    public <T extends SpecialTool> void acquireAndUseTool(T tool) {
-        tool.useTool(this);
+    public <T extends SpecialTool> void acquireAndUseTool(T tool, int row, int col) {
+        tool.useTool(this, row, col);
     }
 
     public class Menu {
