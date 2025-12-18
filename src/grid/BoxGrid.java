@@ -1,15 +1,14 @@
 package grid;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import boxes.Box;
 import boxes.FixedBox;
 import boxes.RegularBox;
 import boxes.UnchangingBox;
 import exceptions.BoxAlreadyFixedException;
 import exceptions.UnmovableFixedBoxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import tools.SpecialTool;
 
 /*
@@ -158,11 +157,12 @@ public class BoxGrid {
      * * @param row The row index of the selected edge box.
      * @param col The column index of the selected edge box.
      * @param dir The direction to push the box (UP, DOWN, LEFT, RIGHT).
+     * @return true if a FixedBox was encountered on the path, false otherwise.
      * @throws UnmovableFixedBoxException If the user tries to push a FixedBox directly.
      */
-    public void rollBox(int row, int col, Direction dir) throws UnmovableFixedBoxException {
+    public boolean rollBox(int row, int col, Direction dir) throws UnmovableFixedBoxException {
         // Validation: Movement must start from a valid edge inward.
-        if (!isValidMoveFromEdge(row, col, dir)) return;
+        if (!isValidMoveFromEdge(row, col, dir)) return false;
 
         Box startBox = getBoxAt(row, col);
         
@@ -176,11 +176,12 @@ public class BoxGrid {
 
         // Delegate to specific directional logic
         switch (dir) {
-            case RIGHT: shiftRowRight(row); break;
-            case LEFT:  shiftRowLeft(row); break;
-            case DOWN:  shiftColDown(col); break;
-            case UP:    shiftColUp(col); break;
+            case RIGHT: return shiftRowRight(row);
+            case LEFT:  return shiftRowLeft(row);
+            case DOWN:  return shiftColDown(col);
+            case UP:    return shiftColUp(col);
         }
+        return false;
     }
 
     /**
@@ -207,21 +208,18 @@ public class BoxGrid {
      * 2. Shift all boxes between the start and the obstacle one step right.
      * 3. The box immediately to the left of the FixedBox is "crushed/eaten" (overwritten).
      * 4. A new random box enters at the start of the row.
+     * @return true if a FixedBox was encountered, false otherwise.
      */
-    private void shiftRowRight(int row) throws UnmovableFixedBoxException {
+    private boolean shiftRowRight(int row) throws UnmovableFixedBoxException {
         // 1. Find the limit (FixedBox)
         int limitCol = SIZE;
+        boolean foundFixedBox = false;
         for (int c = 0; c < SIZE; c++) {
             if (getBoxAt(row, c) instanceof FixedBox) {
                 limitCol = c;
+                foundFixedBox = true;
                 break;
             }
-        }
-        
-        // Track moved locations for the "Open Box" stage
-        for (int c = 0; c < limitCol; c++) {
-            // Boxes from 0 to limitCol-1 will move. We track their positions.
-            rolledThisTurnLocations.add(new BoxLocation(row, c));
         }
 
         // 2 & 3. Shift Logic (Iterate backwards to prevent overwriting data we still need)
@@ -235,21 +233,30 @@ public class BoxGrid {
         
         // 4. Insert new box at the start (Index 0)
         setBoxAt(row, 0, createRandomBox());
+        
+        // Track moved locations AFTER shift - these are the NEW positions
+        // Boxes that were at 0..limitCol-2 are now at 1..limitCol-1
+        // Also include position 0 since a new box entered there
+        for (int c = 0; c < limitCol; c++) {
+            rolledThisTurnLocations.add(new BoxLocation(row, c));
+        }
+        
+        return foundFixedBox;
     }
 
-    private void shiftRowLeft(int row) throws UnmovableFixedBoxException {
+    /**
+     * @return true if a FixedBox was encountered, false otherwise.
+     */
+    private boolean shiftRowLeft(int row) throws UnmovableFixedBoxException {
         // Find obstacle from right to left
         int limitCol = -1;
+        boolean foundFixedBox = false;
         for (int c = SIZE - 1; c >= 0; c--) {
             if (getBoxAt(row, c) instanceof FixedBox) {
                 limitCol = c;
+                foundFixedBox = true;
                 break;
             }
-        }
-
-        // Track moved locations
-        for (int c = SIZE - 1; c > limitCol; c--) {
-             rolledThisTurnLocations.add(new BoxLocation(row, c));
         }
 
         // Shift boxes leftwards
@@ -261,21 +268,28 @@ public class BoxGrid {
         
         // Insert new box at the rightmost end
         setBoxAt(row, SIZE - 1, createRandomBox());
+        
+        // Track moved locations AFTER shift
+        for (int c = SIZE - 1; c > limitCol; c--) {
+             rolledThisTurnLocations.add(new BoxLocation(row, c));
+        }
+        
+        return foundFixedBox;
     }
 
-    private void shiftColDown(int col) throws UnmovableFixedBoxException {
+    /**
+     * @return true if a FixedBox was encountered, false otherwise.
+     */
+    private boolean shiftColDown(int col) throws UnmovableFixedBoxException {
         // Find obstacle from top to bottom
         int limitRow = SIZE;
+        boolean foundFixedBox = false;
         for (int r = 0; r < SIZE; r++) {
             if (getBoxAt(r, col) instanceof FixedBox) {
                 limitRow = r;
+                foundFixedBox = true;
                 break;
             }
-        }
-        
-        // Track moved locations
-        for (int r = 0; r < limitRow; r++) {
-            rolledThisTurnLocations.add(new BoxLocation(r, col));
         }
 
         // Shift boxes downwards
@@ -287,21 +301,28 @@ public class BoxGrid {
         
         // Insert new box at the top
         setBoxAt(0, col, createRandomBox());
+        
+        // Track moved locations AFTER shift
+        for (int r = 0; r < limitRow; r++) {
+            rolledThisTurnLocations.add(new BoxLocation(r, col));
+        }
+        
+        return foundFixedBox;
     }
 
-    private void shiftColUp(int col) throws UnmovableFixedBoxException {
+    /**
+     * @return true if a FixedBox was encountered, false otherwise.
+     */
+    private boolean shiftColUp(int col) throws UnmovableFixedBoxException {
         // Find obstacle from bottom to top
         int limitRow = -1;
+        boolean foundFixedBox = false;
         for (int r = SIZE - 1; r >= 0; r--) {
             if (getBoxAt(r, col) instanceof FixedBox) {
                 limitRow = r;
+                foundFixedBox = true;
                 break;
             }
-        }
-
-        // Track moved locations
-        for (int r = SIZE - 1; r > limitRow; r--) {
-            rolledThisTurnLocations.add(new BoxLocation(r, col));
         }
 
         // Shift boxes upwards
@@ -313,6 +334,13 @@ public class BoxGrid {
         
         // Insert new box at the bottom
         setBoxAt(SIZE - 1, col, createRandomBox());
+        
+        // Track moved locations AFTER shift
+        for (int r = SIZE - 1; r > limitRow; r--) {
+            rolledThisTurnLocations.add(new BoxLocation(r, col));
+        }
+        
+        return foundFixedBox;
     }
 
     /**
@@ -414,9 +442,23 @@ public class BoxGrid {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        // Column Headers
-        sb.append("      ");
-        for (int c = 1; c <= SIZE; c++) sb.append("C").append(c).append("      ");
+        // Column Headers - each box is 9 chars wide: "| X-Y-Z |"
+        // Row label is "R1  " = 4 chars, so header starts with 4 spaces
+        sb.append("    ");
+        for (int c = 1; c <= SIZE; c++) {
+            // Each header cell should be 9 chars to match box width
+            // "   C1    " = 9 chars (4 spaces + C + digit + 3 spaces for C1-C8)
+            // But C1-C9 have different widths, so use format
+            String header = String.format("   C%-5d", c);
+            sb.append(header);
+        }
+        sb.append("\n");
+        
+        // Separator line (4 leading + 9*8 = 76 chars)
+        sb.append("    ");
+        for (int i = 0; i < SIZE * 9; i++) {
+            sb.append("-");
+        }
         sb.append("\n");
 
         // Rows
@@ -430,16 +472,19 @@ public class BoxGrid {
                 
                 // Determine Status Marker 
                 // O = Open/Empty or Fixed
-                // S = Special Tool inside (and open)
                 // M = Mystery (Closed)
-                if (b instanceof FixedBox || (b.isOpen() && b.getTool() == null)) {
+                if (b instanceof FixedBox || b.isOpen()) {
                     sb.append("O");
-                } else if (b.isOpen() && b.getTool() != null) {
-                     sb.append("S"); 
                 } else {
                     sb.append("M");
                 }
-                sb.append(" | ");
+                sb.append(" |");
+            }
+            sb.append("\n");
+            // Separator after each row
+            sb.append("    ");
+            for (int i = 0; i < SIZE * 9; i++) {
+                sb.append("-");
             }
             sb.append("\n");
         }
