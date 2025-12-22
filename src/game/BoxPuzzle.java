@@ -475,43 +475,49 @@ public class BoxPuzzle {
          */
         @SuppressWarnings("unused")
         private void handleToolUsage(SpecialTool tool, int openedRow, int openedCol) {
-            // Get target coordinates based on tool type
-            if (tool instanceof tools.MassRowStamp) {
-                // MassRowStamp needs only row
-                while (true) {
-                    String input = getInput("Please enter the row to use this SpecialTool (1-8): ");
-                    try {
-                        int row = Integer.parseInt(input.trim()) - 1;
-                        if (row >= 0 && row < BoxGrid.SIZE) {
-                            acquireAndUseTool(tool, row, 0);
-                            System.out.println("\nAll boxes in row " + (row + 1) + " have been stamped to letter \"" + targetLetter + "\". The new state of the box grid:\n");
-                            printGrid();
-                            return;
-                        }
-                    } catch (NumberFormatException e) {
-                        // Continue to error message
+        // Get target coordinates based on tool type
+        if (tool instanceof tools.MassRowStamp) {
+            // MassRowStamp needs only row
+            while (true) {
+                String input = getInput("Please enter the row to use this SpecialTool (e.g., 1 or R1): ");
+                try {
+                    // "R" veya "r" harfini temizleyip sadece sayıyı alıyoruz
+                    String cleanInput = input.toUpperCase().replace("R", "").trim();
+                    int row = Integer.parseInt(cleanInput) - 1;
+                    
+                    if (row >= 0 && row < BoxGrid.SIZE) {
+                        acquireAndUseTool(tool, row, 0);
+                        System.out.println("\nAll boxes in row " + (row + 1) + " have been stamped to letter \"" + targetLetter + "\". The new state of the box grid:\n");
+                        printGrid();
+                        return;
                     }
-                    System.out.println("Invalid row. Please enter a number between 1-8.");
+                } catch (NumberFormatException e) {
+                    // Hata mesajına devam et
                 }
-                
-            } else if (tool instanceof tools.MassColumnStamp) {
-                // MassColumnStamp needs only column
-                while (true) {
-                    String input = getInput("Please enter the column to use this SpecialTool (1-8): ");
-                    try {
-                        int col = Integer.parseInt(input.trim()) - 1;
-                        if (col >= 0 && col < BoxGrid.SIZE) {
-                            acquireAndUseTool(tool, 0, col);
-                            System.out.println("\nAll boxes in column " + (col + 1) + " have been stamped to letter \"" + targetLetter + "\". The new state of the box grid:\n");
-                            printGrid();
-                            return;
-                        }
-                    } catch (NumberFormatException e) {
-                        // Continue to error message
+                System.out.println("Invalid row. Please enter a valid row number (1-8).");
+            }
+            
+        } else if (tool instanceof tools.MassColumnStamp) {
+            // MassColumnStamp needs only column
+            while (true) {
+                String input = getInput("Please enter the column to use this SpecialTool (e.g., 1 or C1): ");
+                try {
+                    // "C" veya "c" harfini temizleyip sadece sayıyı alıyoruz
+                    String cleanInput = input.toUpperCase().replace("C", "").trim();
+                    int col = Integer.parseInt(cleanInput) - 1;
+                    
+                    if (col >= 0 && col < BoxGrid.SIZE) {
+                        acquireAndUseTool(tool, 0, col);
+                        System.out.println("\nAll boxes in column " + (col + 1) + " have been stamped to letter \"" + targetLetter + "\". The new state of the box grid:\n");
+                        printGrid();
+                        return;
                     }
-                    System.out.println("Invalid column. Please enter a number between 1-8.");
+                } catch (NumberFormatException e) {
+                    // Hata mesajına devam et
                 }
-                
+                System.out.println("Invalid column. Please enter a valid column number (1-8).");
+            }
+        
             } else if (tool instanceof tools.PlusShapeStamp) {
                 // PlusShapeStamp needs row and column
                 while (true) {
