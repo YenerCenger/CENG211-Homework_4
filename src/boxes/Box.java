@@ -136,17 +136,17 @@ public abstract class Box {
                 break;
             case UP:
                 temp = bottom;
-                bottom = back;
-                back = top;
-                top = front;
-                front = temp;
-                break;
-            case DOWN:
-                temp = bottom;
                 bottom = front;
                 front = top;
                 top = back;
                 back = temp;
+                break;
+            case DOWN:
+                temp = bottom;
+                bottom = back;
+                back = top;
+                top = front;
+                front = temp;
                 break;
         }
     }
