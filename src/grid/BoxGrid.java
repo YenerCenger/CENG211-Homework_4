@@ -135,14 +135,22 @@ public class BoxGrid {
         }
     }
 
+    // FIXED METHOD
     private SpecialTool generateRandomToolForRegular() {
         // Regular boxes have 75% chance of containing a tool.
+        // If we are in the 75% bracket, we must distribute the 5 tools evenly.
+        // Target: 15% absolute chance per tool.
+        // Calculation: 15% / 75% = 20% (0.20) conditional chance.
+        
         if (rng.nextDouble() >= 0.75) return null;
-        return SpecialTool.randomTool(this, rng, 0.15);
+        
+        // CORRECTION: Change 0.15 to 0.20
+        return SpecialTool.randomTool(this, rng, 0.20);
     }
 
+    // This method remains UNCHANGED as UnchangingBox has 100% tool chance
+    // and requires 20% per tool (5 * 20 = 100). 
     private SpecialTool generateRandomToolForUnchanging() {
-        // Unchanging boxes are guaranteed to have a tool (20% chance for each type).
         return SpecialTool.randomTool(this, rng, 0.20);
     }
 
@@ -388,7 +396,7 @@ public class BoxGrid {
         }
 
         // Replace with a new FixedBox (effectively removing any tool inside the old box)
-        FixedBox newFixed = new FixedBox();
+        FixedBox newFixed = new FixedBox(currentBox);
         setBoxAt(row, col, newFixed);
     }
 

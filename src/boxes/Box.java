@@ -16,6 +16,18 @@ public abstract class Box {
 
     private static final Random RAND = new Random();
 
+    // ADDED: Protected constructor for copying faces
+    protected Box(Box other) {
+        this.front = other.front;
+        this.back = other.back;
+        this.left = other.left;
+        this.right = other.right;
+        this.top = other.top;
+        this.bottom = other.bottom;
+        this.isOpen = false; // FixedBox should start closed/reset
+        this.tool = null;    // FixedBox cannot have tools
+    }
+
     public Box() {
         this.isOpen = false;
         assignRandomLetters();

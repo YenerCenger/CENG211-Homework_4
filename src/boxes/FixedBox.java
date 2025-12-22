@@ -10,6 +10,11 @@ public class FixedBox extends Box {
         super();
     }
 
+    // ADDED: Constructor that copies faces from another box
+    public FixedBox(Box original) {
+        super(original);
+    }
+
     @Override
     public char getTypeMarker() {
         char c = 'X';
