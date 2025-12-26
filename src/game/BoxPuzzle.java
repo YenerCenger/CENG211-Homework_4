@@ -194,11 +194,6 @@ public class BoxPuzzle {
          * @param col 0-based column index
          * @return true if the coordinate is a corner
          */
-        private boolean isCorner(int row, int col) {
-            boolean isTopOrBottom = (row == 0 || row == BoxGrid.SIZE - 1);
-            boolean isLeftOrRight = (col == 0 || col == BoxGrid.SIZE - 1);
-            return isTopOrBottom && isLeftOrRight;
-        }
 
         /**
          * Returns the valid direction(s) for rolling from an edge position.
@@ -525,7 +520,7 @@ public class BoxPuzzle {
                 while (true) {
                     String input = getInput("Please enter the row to use this SpecialTool (e.g., 1 or R1): ");
                     try {
-                        // "R" veya "r" harfini temizleyip sadece sayıyı alıyoruz
+                        // Strip "R" or "r" prefix and extract the row number
                         String cleanInput = input.toUpperCase().replace("R", "").trim();
                         int row = Integer.parseInt(cleanInput) - 1;
 
@@ -542,7 +537,7 @@ public class BoxPuzzle {
                             }
                         }
                     } catch (NumberFormatException e) {
-                        // Hata mesajına devam et
+                        // Fall through to error message
                     }
                     System.out.println("Invalid row. Please enter a valid row number (1-8).");
                 }
@@ -552,7 +547,7 @@ public class BoxPuzzle {
                 while (true) {
                     String input = getInput("Please enter the column to use this SpecialTool (e.g., 1 or C1): ");
                     try {
-                        // "C" veya "c" harfini temizleyip sadece sayıyı alıyoruz
+                        // Strip "C" or "c" prefix and extract the column number
                         String cleanInput = input.toUpperCase().replace("C", "").trim();
                         int col = Integer.parseInt(cleanInput) - 1;
 
@@ -570,7 +565,7 @@ public class BoxPuzzle {
                             }
                         }
                     } catch (NumberFormatException e) {
-                        // Hata mesajına devam et
+                        // Fall through to error message
                     }
                     System.out.println("Invalid column. Please enter a valid column number (1-8).");
                 }

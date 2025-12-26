@@ -3,7 +3,7 @@ package boxes;
 public class RegularBox extends Box {
 
     public RegularBox() {
-        super(); // Random nums
+        super(); // Initialize with random faces
     }
 
     @Override

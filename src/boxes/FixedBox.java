@@ -27,7 +27,7 @@ public class FixedBox extends Box {
 
     @Override
     public void setTool(SpecialTool tool) {
-        super.setTool(null); // Ne verilirse verilsin null yap.
+        super.setTool(null); // FixedBox cannot contain tools, always set to null
     }
 
     @Override

@@ -85,14 +85,14 @@ public abstract class Box {
 
         for (int i = 0; i < 6; i++) {
             char candidate;
-            // KURAL: Seçilen harf 2 adetten fazla olamaz [cite: 14]
-            // Doğru harfi bulana kadar döngüde kal
+            // RULE: Each letter can appear at most twice on a box [cite: 14]
+            // Keep searching until we find a suitable letter
             while (true) {
                 candidate = letters[RAND.nextInt(letters.length)];
                 int currentCount = counts.getOrDefault(candidate, 0);
                 if (currentCount < 2) {
                     counts.put(candidate, currentCount + 1);
-                    break; // Uygun harf bulundu, while'dan çık
+                    break; // Found a suitable letter, exit loop
                 }
             }
             chosen[i] = candidate;
