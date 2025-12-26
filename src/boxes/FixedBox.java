@@ -17,8 +17,7 @@ public class FixedBox extends Box {
 
     @Override
     public char getTypeMarker() {
-        char c = 'X';
-        return c; // R for Regular Box
+        return 'X';
     }
 
     @Override

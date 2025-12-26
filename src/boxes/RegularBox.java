@@ -8,7 +8,6 @@ public class RegularBox extends Box {
 
     @Override
     public char getTypeMarker() {
-        char c = 'R';
-        return c; // R for Regular Box
+        return 'R';
     }
 }
