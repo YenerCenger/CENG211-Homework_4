@@ -25,7 +25,7 @@ public abstract class Box {
         this.top = other.top;
         this.bottom = other.bottom;
         this.isOpen = false; // FixedBox should start closed/reset
-        this.tool = null;    // FixedBox cannot have tools
+        this.tool = null; // FixedBox cannot have tools
     }
 
     public Box() {
